@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative './game'
 require 'json'
 
@@ -7,7 +9,7 @@ def select_random_word
   loop do
     random_index = Random.rand(0..(dictionary.length - 1))
     word = dictionary[random_index].chomp
-  break if word.length >= 5 && word.length <= 12
+    break if word.length >= 5 && word.length <= 12
   end
   word
 end
@@ -15,10 +17,8 @@ end
 def list_available_games
   puts
   puts 'Available saved games:'
-  Dir.entries('saved_games').each do |entry| 
-    if entry.match?('.json')
-      puts entry.sub('.json','')
-    end
+  Dir.entries('saved_games').each do |entry|
+    puts entry.sub('.json','') if entry.match?('.json')
   end
 end
 
@@ -29,11 +29,7 @@ def play_again?
     puts 'Please choose y or n:'
     play_again = gets.chomp
   end
-  if play_again == 'y'
-    true
-  else
-    false
-  end
+  play_again == 'y'
 end
 
 puts 'Welcome to Hangman!'
@@ -61,7 +57,6 @@ Ready? Then let's start!
 
 puts
 
-
 play_again = true
 
 while play_again
@@ -70,8 +65,9 @@ while play_again
   puts '[2] Load saved game'
   choice = gets.chomp
 
-  if choice == '1' || !File.exists?('saved_games') || Dir.empty?('saved_games')
-    if !File.exists?('saved_games') || Dir.empty?('saved_games')
+  if choice == '1' ||
+     (choice == '2' && (!File.exist?('saved_games') || Dir.empty?('saved_games')))
+    if choice == '2'
       puts
       puts 'There are no saved games yet.'
     end
@@ -81,12 +77,12 @@ while play_again
     answer = select_random_word
     answer_array = answer.split('')
     guess_array = Array.new(answer_array.length)
-    choices = Array.new
+    choices = []
     wrongs = Array.new(9, 0)
     round = 0
   else
     string = Game.load_game
-    game_variables = JSON.load(string)
+    game_variables = JSON.parse(string)
     answer_array = game_variables['answer_array']
     guess_array = game_variables['guess_array']
     choices = game_variables['choices']
@@ -101,7 +97,7 @@ while play_again
 
   until game.wrongs.none?(0) || game.guess_array.none?(nil)
     game.round += 1
-    
+
     puts
     puts "___________Round #{game.round}___________"
 
